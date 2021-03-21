@@ -1,3 +1,5 @@
 target
 .classpath
 dependency-reduced-pom.xml
+.vscode
+.setting
