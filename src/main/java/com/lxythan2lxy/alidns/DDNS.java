@@ -9,17 +9,22 @@ import com.aliyuncs.alidns.model.v20150109.UpdateDomainRecordResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.cli.Option;
 
 public class DDNS {
     /**
@@ -147,16 +152,20 @@ public class DDNS {
         return rtn;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         // 设置鉴权参数，初始化客户端
+        Gson gson = new Gson();
+        JsonReader reader;
+        reader = new JsonReader(new FileReader("D:\\MyConfigure\\alidns\\config.json"));
+        Config config = gson.fromJson(reader, Config.class);
         DefaultProfile profile = DefaultProfile.getProfile("cn-beijing", // 地域ID
-                "ak", // 您的AccessKey ID
-                "as");// 您的AccessKey Secret
+                config.getAccessKeyID(), // 您的AccessKey ID
+                config.getAccessKeySecret());// 您的AccessKey Secret
         IAcsClient client = new DefaultAcsClient(profile);
         DDNS ddns = new DDNS();
         // 查询指定二级域名的最新解析记录
         DescribeSubDomainRecordsRequest describeSubDomainRecordsRequest = new DescribeSubDomainRecordsRequest();
-        describeSubDomainRecordsRequest.setSubDomain("example.com");
+        describeSubDomainRecordsRequest.setSubDomain(config.getDomain());
         DescribeSubDomainRecordsResponse describeSubDomainRecordsResponse = ddns
                 .describeSubDomainRecords(describeSubDomainRecordsRequest, client);
         log_print("describeSubDomainRecords", describeSubDomainRecordsResponse);
@@ -177,7 +186,7 @@ public class DDNS {
                 // 修改解析记录
                 UpdateDomainRecordRequest updateDomainRecordRequest = new UpdateDomainRecordRequest();
                 // 主机记录
-                updateDomainRecordRequest.setRR("dynamicdns");
+                updateDomainRecordRequest.setRR(config.getRr());
                 // 记录ID
                 updateDomainRecordRequest.setRecordId(recordId);
                 // 将主机记录值改为当前主机IP

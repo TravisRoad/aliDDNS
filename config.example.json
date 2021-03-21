@@ -1,0 +1,6 @@
+{
+    "accessKeyID":"xxx",
+    "accessKeySecret":"xxxxx",
+    "domain":"dynamicdns.example.com",
+    "rr":"dynamicdns"
+}
